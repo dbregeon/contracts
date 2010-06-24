@@ -13,7 +13,7 @@ public final class ContractInvocationHandler<T> implements InvocationHandler {
     private Contract<T> contract;
     private final T contractedObject;
 
-    public ContractInvocationHandler(final T object) {
+    public ContractInvocationHandler(final T object) throws ContractClassException, ContractBreachException {
         contractedObject = object;
         contract = ContractFactory.instance().contractFor(contractedObject.getClass());
     }
@@ -30,13 +30,13 @@ public final class ContractInvocationHandler<T> implements InvocationHandler {
         return result;
     }
 
-    private void verifyPrecondition(final Method method, final Object[] args) {
+    private void verifyPrecondition(final Method method, final Object[] args) throws ContractBreachException {
         if (hasContract()) {
             contract.verifyPrecondition(contractedObject, method, args);
         }
     }
 
-    private void verifyPostcondition(final Method method, final Object[] args, final Object result) {
+    private void verifyPostcondition(final Method method, final Object[] args, final Object result) throws ContractBreachException {
         if (hasContract()) {
             contract.verifyPostcondition(contractedObject, method, args, result);
         }

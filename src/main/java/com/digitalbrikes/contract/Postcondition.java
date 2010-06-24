@@ -4,14 +4,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-final class Postcondition extends Condition {
+final class Postcondition<T> extends Condition<T> {
     private boolean isVoid;
 
-    public Postcondition(final Method method, final Object implementation) {
+    public Postcondition(final Method method, final Object implementation) throws ContractBreachException {
         super(method, implementation);
     }
 
-    public boolean verify(final Object contractObject, final Object[] args, final Object result) {
+    public boolean verify(final T contractObject, final Object[] args, final Object result) {
         return invoke(arguments(contractObject, args, result));
     }
 
@@ -38,7 +38,7 @@ final class Postcondition extends Condition {
         return method.getAnnotation(PostConditioned.class).postcondition();
     }
 
-    private Object[] arguments(final Object contractObject, final Object[] invocationArguments, final Object result) {
+    private Object[] arguments(final T contractObject, final Object[] invocationArguments, final Object result) {
         final List<Object> contractArgs = new ArrayList<Object>();
         contractArgs.add(contractObject);
         for (int i = 0; i < invocationArguments.length; i++) {

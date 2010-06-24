@@ -10,7 +10,7 @@ public aspect ContractAspect pertypewithin(!com.digitalbrikes.contract.*){
     pointcut precondition(): contracted(Object) && execution(public * *.*(..)) && if (isPreconditioned(thisJoinPoint));
     pointcut postcondition(): contracted(Object) && execution(public * *.*(..)) && if (isPostconditioned(thisJoinPoint));
     
-    private static Contract contract;
+    private static Contract<Object> contract;
     
     private static Method method(JoinPoint joinPoint) {
         return ((MethodSignature) joinPoint.getSignature()).getMethod();
@@ -23,7 +23,7 @@ public aspect ContractAspect pertypewithin(!com.digitalbrikes.contract.*){
         return null == contract;
     }
     
-    private static Contract contract() {
+    private static Contract<Object> contract() {
         return contract;
     }
     

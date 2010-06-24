@@ -5,16 +5,16 @@ import java.lang.reflect.Method;
 
 import com.digitalbrikes.contract.ContractBreachException.ErrorType;
 
-abstract class Condition {
+abstract class Condition<T> {
     private final Method conditionMethod;
     private final Object implementation;
 
-    public Condition(final Method m, final Object i) {
+    public Condition(final Method m, final Object i) throws ContractBreachException {
         implementation = i;
         conditionMethod = conditionMethod(m);
     }
 
-    protected final Boolean invoke(final Object[] args) {
+    protected final Boolean invoke(final Object[] args) throws ContractBreachException {
         try {
             return (Boolean) conditionMethod.invoke(implementation, args);
         } catch (IllegalArgumentException e) {
@@ -36,7 +36,7 @@ abstract class Condition {
         return result.toString();
     }
 
-    private Method conditionMethod(final Method method) {
+    private Method conditionMethod(final Method method) throws ContractBreachException {
         try {
             return implementation.getClass().getDeclaredMethod(methodName(method), parameterTypes(method));
         } catch (SecurityException e) {

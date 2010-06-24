@@ -2,16 +2,16 @@ package com.digitalbrikes.contract;
 
 import java.lang.reflect.Method;
 
-final class Precondition extends Condition {
-    public Precondition(final Method m, final Object i) {
+final class Precondition<T> extends Condition<T> {
+    public Precondition(final Method m, final Object i) throws ContractBreachException {
         super(m, i);
     }
 
-    public boolean verify(final Object contractObject, final Object[] args) {
+    public boolean verify(final T contractObject, final Object[] args) {
         return invoke(arguments(contractObject, args));
     }
 
-    private Object[] arguments(final Object contractObject, final Object[] invocationArguments) {
+    private Object[] arguments(final T contractObject, final Object[] invocationArguments) {
         final Object[] contractArgs = new Object[invocationArguments.length + 1];
         contractArgs[0] = contractObject;
         for (int i = 0; i < invocationArguments.length; i++) {
