@@ -5,12 +5,23 @@ import java.lang.reflect.Method;
 public final class ContractBreachException extends ContractException {
     private static final long serialVersionUID = 1L;
 
-    public ContractBreachException(final ErrorType type, final Method method) {
-        this(type, method, null);
+    private static String fullMethodName(final Method method) {
+        final StringBuilder result = new StringBuilder(method.getDeclaringClass().getName());
+        result.append(".");
+        result.append(method.getName());
+        return result.toString();
     }
 
-    public ContractBreachException(final ErrorType type, final Method method, final Throwable e) {
-        super(type.message(method), e);
+    ContractBreachException(final ErrorType type, final Method method) {
+        this(type, method.getName(), null);
+    }
+
+    ContractBreachException(final ErrorType type, final Method method, final Throwable e) {
+        this(type, fullMethodName(method), e);
+    }
+
+    ContractBreachException(final ErrorType type, final String methodName, final Throwable e) {
+        super(type.message(methodName), e);
     }
 
     public static enum ErrorType {
@@ -26,12 +37,10 @@ public final class ContractBreachException extends ContractException {
             messageBase = s;
         }
 
-        public String message(final Method breachMethod) {
+        public String message(final String methodName) {
             final StringBuilder result = new StringBuilder(messageBase);
             result.append(" ");
-            result.append(breachMethod.getDeclaringClass().getName());
-            result.append(".");
-            result.append(breachMethod.getName());
+            result.append(methodName);
             return result.toString();
         }
     }

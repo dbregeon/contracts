@@ -1,4 +1,4 @@
-package com.digitalbrikes.service;
+package com.digitalbrikes.contract;
 
 
 import static org.mockito.Mockito.when;
@@ -9,15 +9,11 @@ import junit.framework.TestCase;
 
 import org.mockito.Mockito;
 
-import com.digitalbrikes.contract.ContractBreachException;
-import com.digitalbrikes.contract.ContractInvocationHandler;
-
-public final class TestServiceUserTest extends TestCase {
+public final class ContractInvocationHandlerTest extends TestCase {
     private ContractedServiceExample service;
     private Object value;
-    private NonContractedServiceExample nonContractedService;
 
-    public void testMethodUnderTestThrowsContractBreach() {
+    public void testMethodUnderTestThrowsContractBreachWhenPreconditionIsBroken() {
         givenAContractedService();
 
         final ContractedServiceExampleUser testedUser = new ContractedServiceExampleUser(contractedService());
@@ -41,7 +37,7 @@ public final class TestServiceUserTest extends TestCase {
         assertSame(value(), testedUser.methodUnderTest(value()));
     }
 
-    public void testTestThrowsContractBreachWhenStubbingBreachesTheContract() {
+    public void testTestThrowsContractBreachWhenStubbingBreachesThePostcondition() {
         givenAContractedService();
         givenAValue();
 
@@ -61,22 +57,6 @@ public final class TestServiceUserTest extends TestCase {
         final ContractedServiceExampleUser testedUser = new ContractedServiceExampleUser(contractedService());
 
         assertNull(testedUser.otherMethodUnderTest(null));
-    }
-
-    public void testNonContractedServiceHasNoContract() {
-        givenANonContractedService();
-
-        final NonContractedServiceExampleUser testedUser = new NonContractedServiceExampleUser(nonContractedService());
-
-        assertNull(testedUser.methodUnderTest(null));
-    }
-
-    private NonContractedServiceExample nonContractedService() {
-        return nonContractedService;
-    }
-
-    private void givenANonContractedService() {
-        nonContractedService = contractedMock(NonContractedServiceExample.class);
     }
 
     private ContractedServiceExample mock() {
@@ -100,7 +80,44 @@ public final class TestServiceUserTest extends TestCase {
     }
 
     private <T> T contractedMock(final Class<T> clazz) {
-        final ContractInvocationHandler<T> invocationHandler = new ContractInvocationHandler<T>(clazz, Mockito.mock(clazz));
+        final ContractInvocationHandler<T> invocationHandler = new ContractInvocationHandler<T>(Mockito.mock(clazz));
         return (T) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {clazz}, invocationHandler);
+    }
+
+    @Contracted(contract = ContractedServiceExampleContract.class)
+    public static interface ContractedServiceExample {
+        @PreConditioned(precondition = "preDoSomething")
+        @PostConditioned(postcondition = "postDoSomething")
+        Object doSomething(Object o);
+
+        Object nonContractedAction(Object o);
+    }
+
+    public static final class ContractedServiceExampleContract {
+        public boolean preDoSomething(final ContractedServiceExample s, final Object o) {
+            return null != o;
+        }
+
+        public boolean postDoSomething(final ContractedServiceExample s, final Object o, final Object result) {
+            return o == result;
+        }
+    }
+
+    public static final class ContractedServiceExampleUser {
+        private final ContractedServiceExample contractedService;
+
+        public ContractedServiceExampleUser(
+                final ContractedServiceExample s) {
+            contractedService = s;
+        }
+
+        public Object methodUnderTest(final Object object) {
+            return contractedService.doSomething(object);
+        }
+
+        public Object otherMethodUnderTest(final Object object) {
+            return contractedService.nonContractedAction(object);
+        }
+
     }
 }

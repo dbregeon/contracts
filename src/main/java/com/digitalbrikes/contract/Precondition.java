@@ -2,9 +2,9 @@ package com.digitalbrikes.contract;
 
 import java.lang.reflect.Method;
 
-public final class Precondition extends Condition {
+final class Precondition extends Condition {
     public Precondition(final Method m, final Object i) {
-        super(ConditionType.PRE, m, i);
+        super(m, i);
     }
 
     public boolean verify(final Object contractObject, final Object[] args) {
@@ -18,6 +18,11 @@ public final class Precondition extends Condition {
             contractArgs[i + 1] = invocationArguments[i];
         }
         return contractArgs;
+    }
+
+    @Override
+    protected String methodName(final Method method) {
+        return method.getAnnotation(PreConditioned.class).precondition();
     }
 
     protected Class<?>[] parameterTypes(final Method method) {

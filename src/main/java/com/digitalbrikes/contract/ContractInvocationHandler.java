@@ -3,18 +3,19 @@ package com.digitalbrikes.contract;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-
+/**
+ * This InvocationHandler can be used to proxy an instance of a class that has a specified contract.
+ * It will ensure that the contract will be enforced for calls to this instance.
+ *
+ * @param <T> the type under contract.
+ */
 public final class ContractInvocationHandler<T> implements InvocationHandler {
     private Contract<T> contract;
     private final T contractedObject;
-    private final Class<T> contractedClass;
 
-    public ContractInvocationHandler(final Class<T> clazz, final T object) {
-        contractedClass = clazz;
+    public ContractInvocationHandler(final T object) {
         contractedObject = object;
-        if (contractedClass.isAnnotationPresent(Contracted.class)) {
-            contract = new Contract<T>(contractedClass);
-        }
+        contract = ContractFactory.instance().contractFor(contractedObject.getClass());
     }
 
     public T contractedObject() {

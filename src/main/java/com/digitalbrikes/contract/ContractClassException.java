@@ -4,12 +4,11 @@ package com.digitalbrikes.contract;
 public final class ContractClassException extends ContractException {
     private static final long serialVersionUID = 1L;
 
-    public ContractClassException(final ErrorType type, final Class<?> clazz, final Throwable cause) {
+    ContractClassException(final ErrorType type, final Class<?> clazz, final Throwable cause) {
         super(type.message(clazz), cause);
     }
 
     public static enum ErrorType {
-        MISSING_CONTRACT("Could not find contract"),
         CONTRACT_INSTANTIATION("Could not instantiate contract"),
         CONTRACT_ACCESS("Could not access contract");
 

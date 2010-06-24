@@ -207,3 +207,6 @@ target/test-classes/com/digitalbrikes/service/NonContractedServiceExampleUser.cl
 target/test-classes/com/digitalbrikes/service/TestServiceUserTest.class
 target/test-classes/com/digitalbrikes/service/contract/ContractedServiceExampleContract.class
 target/unusedcode.xml
+.checkstyle
+.classpath
+.project

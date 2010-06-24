@@ -1,48 +1,50 @@
 package com.digitalbrikes.contract;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public final class Contract<T> {
     private final Class<T> contractedClass;
     private final Object implementation;
-    private final Map<Method, Precondition> preconditions = new HashMap<Method, Precondition>();
-    private final Map<Method, Postcondition> postconditions = new HashMap<Method, Postcondition>();
+    private final Map<MethodKey, Precondition> preconditions = new HashMap<MethodKey, Precondition>();
+    private final Map<MethodKey, Postcondition> postconditions = new HashMap<MethodKey, Postcondition>();
 
     public Contract(final Class<T> clazz) {
         contractedClass = clazz;
         implementation = buildInstanceOf(contractClass(contractedClass));
+        initializeConditions();
     }
 
     public void verifyPrecondition(final T contractObject, final Method method, final Object[] args) {
-        if (method.isAnnotationPresent(PreConditioned.class) && !precondition(method).verify(contractObject, args)) {
+        final Precondition precondition = precondition(method);
+        if (null != precondition && !precondition.verify(contractObject, args)) {
             throw new ContractBreachException(ContractBreachException.ErrorType.BREACHED_CONTRACT,  method);
         }
     }
 
     public void verifyPostcondition(final T contractObject, final Method method, final Object[] args, final Object result) {
-        if (method.isAnnotationPresent(PostConditioned.class) && !postcondition(method).verify(contractObject, args, result)) {
+        final Postcondition postcondition = postcondition(method);
+        if (null != postcondition &&  !postcondition.verify(contractObject, args, result)) {
             throw new ContractBreachException(ContractBreachException.ErrorType.BREACHED_CONTRACT,  method);
         }
     }
 
+    public boolean isPreconditioned(final Method m) {
+        return (null != precondition(m));
+    }
+
+    public boolean isPostconditioned(final Method m) {
+        return (null != postcondition(m));
+    }
+
     private Precondition precondition(final Method method) {
-        Precondition result = preconditions.get(method);
-        if (null == result) {
-            result = new Precondition(method, implementation);
-            preconditions.put(method, result);
-        }
-        return result;
+        return preconditions.get(new MethodKey(method));
     }
 
     private Postcondition postcondition(final Method method) {
-        Postcondition result = postconditions.get(method);
-        if (null == result) {
-            result = new Postcondition(method, implementation);
-            postconditions.put(method, result);
-        }
-        return result;
+        return postconditions.get(new MethodKey(method));
     }
 
     private Object buildInstanceOf(final Class<?> contractClass) {
@@ -56,12 +58,47 @@ public final class Contract<T> {
     }
 
     private Class<?> contractClass(final Class<T> clazz) {
-        Class<?> result = null;
-        try {
-            result = getClass().getClassLoader().loadClass(clazz.getPackage().getName() + ".contract." + clazz.getSimpleName() + "Contract");
-        } catch (ClassNotFoundException e) {
-            throw new ContractClassException(ContractClassException.ErrorType.MISSING_CONTRACT, clazz, e);
+        return clazz.getAnnotation(Contracted.class).contract();
+    }
+
+    private void initializeConditions() {
+        for (Method method : contractedClass.getDeclaredMethods()) {
+            addPreconditionFor(method);
+            addPostConditionFor(method);
         }
-        return result;
+    }
+
+    private void addPostConditionFor(final Method method) {
+        if (method.isAnnotationPresent(PostConditioned.class)) {
+            postconditions.put(new MethodKey(method), new Postcondition(method, implementation));
+        }
+    }
+
+    private void addPreconditionFor(final Method method) {
+        if (method.isAnnotationPresent(PreConditioned.class)) {
+            preconditions.put(new MethodKey(method), new Precondition(method, implementation));
+        }
+    }
+
+    private static class MethodKey {
+        private final String name;
+        private final Class<?>[] parameterTypes;
+
+        @Override
+        public int hashCode() {
+            return name.hashCode() ^ Arrays.hashCode(parameterTypes);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            final MethodKey other = (MethodKey) obj;
+            return name.equals(other.name) && Arrays.equals(parameterTypes, other.parameterTypes);
+        }
+
+        public MethodKey(final Method method) {
+            name = method.getName();
+            parameterTypes = method.getParameterTypes();
+        }
+
     }
 }
