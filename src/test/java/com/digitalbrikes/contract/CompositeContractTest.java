@@ -1,22 +1,24 @@
 package com.digitalbrikes.contract;
 
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public final class CompositeContractTest extends TestCase {
+public final class CompositeContractTest {
     private ArrayList<Contract<CompositeContractTest>> contractList;
     private Contract<CompositeContractTest> contract;
     private Method method;
     private Object[] args;
     private Object result;
 
-    public void testIsPreconditionDelegatesToSubcontract() {
+    @Test
+    public void isPreconditionShouldDelegateToSubcontract() {
         givenAListOfContract();
         givenAContract();
         givenAMethod();
@@ -30,7 +32,8 @@ public final class CompositeContractTest extends TestCase {
         verify(contract()).isPreconditioned(method());
     }
 
-    public void testIsPostconditionDelegatesToSubcontract() {
+    @Test
+    public void isPostconditionShouldDelegateToSubcontract() {
         givenAListOfContract();
         givenAContract();
         givenAMethod();
@@ -44,7 +47,8 @@ public final class CompositeContractTest extends TestCase {
         verify(contract()).isPostconditioned(method());
     }
 
-    public void testIsPreconditionReturnsValueFromTheSubcontract() {
+    @Test
+    public void isPreconditionShouldReturnValueFromTheSubcontract() {
         givenAListOfContract();
         givenAContract();
         givenAMethod();
@@ -57,7 +61,8 @@ public final class CompositeContractTest extends TestCase {
         assertTrue(testedContract.isPreconditioned(method()));
     }
 
-    public void testIsPostconditionReturnsValueFromTheSubcontract() {
+    @Test
+    public void isPostconditionShouldReturnValueFromTheSubcontract() {
         givenAListOfContract();
         givenAContract();
         givenAMethod();
@@ -70,7 +75,8 @@ public final class CompositeContractTest extends TestCase {
         assertTrue(testedContract.isPostconditioned(method()));
     }
 
-    public void testVerifyPreconditionDelegatesToSubcontract() {
+    @Test
+    public void verifyPreconditionShouldDelegateToSubcontract() {
         givenAListOfContract();
         givenAContract();
         givenAMethod();
@@ -85,7 +91,8 @@ public final class CompositeContractTest extends TestCase {
         verify(contract()).verifyPrecondition(this, method(), args());
     }
 
-    public void testVerifyPostconditionDelegatesToSubcontract() {
+    @Test
+    public void verifyPostconditionShouldDelegateToSubcontract() {
         givenAListOfContract();
         givenAContract();
         givenAMethod();

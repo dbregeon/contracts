@@ -1,32 +1,29 @@
 package com.digitalbrikes.contract;
 
-
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Proxy;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.mockito.Mockito;
 
-public final class ContractInvocationHandlerTest extends TestCase {
+public final class ContractInvocationHandlerTest {
     private ContractedServiceExample service;
     private Object value;
 
-    public void testMethodUnderTestThrowsContractBreachWhenPreconditionIsBroken() {
+    @Test(expected = ContractBreachException.class)
+    public void methodUnderTestShouldThrowContractBreachWhenPreconditionIsBroken() {
         givenAContractedService();
 
         final ContractedServiceExampleUser testedUser = new ContractedServiceExampleUser(contractedService());
 
-        try {
-            testedUser.methodUnderTest(null);
-            fail("Expected a " + ContractBreachException.class);
-        } catch (ContractBreachException e) {
-            e.printStackTrace();
-        }
+        testedUser.methodUnderTest(null);
     }
 
-    public void testMethodUnderTestRespectsContract() {
+    @Test
+    public void methodUnderTestShouldRespectContract() {
         givenAContractedService();
         givenAValue();
 
@@ -37,21 +34,18 @@ public final class ContractInvocationHandlerTest extends TestCase {
         assertSame(value(), testedUser.methodUnderTest(value()));
     }
 
-    public void testTestThrowsContractBreachWhenStubbingBreachesThePostcondition() {
+    @Test(expected = ContractBreachException.class)
+    public void testShouldThrowContractBreachWhenStubbingBreachesThePostcondition() {
         givenAContractedService();
         givenAValue();
 
         final ContractedServiceExampleUser testedUser = new ContractedServiceExampleUser(contractedService());
 
-        try {
-            testedUser.methodUnderTest(value());
-            fail("Expected a " + ContractBreachException.class);
-        } catch (ContractBreachException e) {
-            e.printStackTrace();
-        }
+        testedUser.methodUnderTest(value());
     }
 
-    public void testOtherMethodUnderTestHasNoContract() {
+    @Test
+    public void otherMethodUnderTestShouldHaveNoContract() {
         givenAContractedService();
 
         final ContractedServiceExampleUser testedUser = new ContractedServiceExampleUser(contractedService());

@@ -1,46 +1,58 @@
 package com.digitalbrikes.contract;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Field;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public final class ContractFactoryTest extends TestCase {
+
+public final class ContractFactoryTest {
     private static final int NUMBER_OF_CLASSES = 3;
 
-    public void testContractForReturnsNullWhenClassIsNotContracted() {
+    @Test
+    public void contractForShouldReturnNullWhenClassIsNotContracted() {
         assertNull(ContractFactory.instance().contractFor(ContractFactoryTest.class));
     }
 
-    public void testContractForReturnsACompositeContractWhenClassIsSubjectToMultipleContracts() {
+    @Test
+    public void contractForShouldReturnACompositeContractWhenClassIsSubjectToMultipleContracts() {
         assertTrue(ContractFactory.instance().contractFor(SubContractedClass.class) instanceof CompositeContract);
     }
 
-    public void testContractForReturnsASimpleContractWhenClassIsSubjectToASingleContract() {
+    @Test
+    public void contractForShouldReturnASimpleContractWhenClassIsSubjectToASingleContract() {
         assertTrue(ContractFactory.instance().contractFor(TopContractedClass.class) instanceof SimpleContract);
     }
 
-    public void testContractForReturnsAIgnoresDuplicateContractedClass() throws ContractClassException, ContractBreachException, NoSuchFieldException, IllegalAccessException {
+    @Test
+    public void contractForShouldIgnoreDuplicateContractedClass() throws ContractClassException, ContractBreachException, NoSuchFieldException, IllegalAccessException {
         assertEquals(NUMBER_OF_CLASSES, subcontracts(ContractFactory.instance().contractFor(OtherSubContractedClass.class)).size());
     }
 
-    public void testContractImplementationForSingleContractIsTheDesignatedContract() throws NoSuchFieldException, IllegalAccessException {
+    @Test
+    public void contractImplementationForSingleContractShouldBeTheDesignatedContract() throws NoSuchFieldException, IllegalAccessException {
         final Contract<TopContractedClass> contract = ContractFactory.instance().contractFor(TopContractedClass.class);
 
         assertTrue(implementation(contract) instanceof TopContract);
     }
 
-    public void testFirstSubContractImplementationsForCompositeContractsIsTheLowestLevelContract() throws NoSuchFieldException, IllegalAccessException {
+    @Test
+    public void firstSubContractImplementationsForCompositeContractsShouldBeTheLowestLevelContract() throws NoSuchFieldException, IllegalAccessException {
         final Contract<SubContractedClass> contract = ContractFactory.instance().contractFor(SubContractedClass.class);
 
-        List<Contract<SubContractedClass>> subcontracts = subcontracts(contract);
+        final List<Contract<SubContractedClass>> subcontracts = subcontracts(contract);
         assertTrue(implementation(subcontracts.get(0)) instanceof SubContract);
     }
 
-    public void testLastSubContractImplementationsForCompositeContractsIsTheHighestLevelContract() throws NoSuchFieldException, IllegalAccessException {
+    @Test
+    public void lastSubContractImplementationsForCompositeContractsShouldBeTheHighestLevelContract() throws NoSuchFieldException, IllegalAccessException {
         final Contract<SubContractedClass> contract = ContractFactory.instance().contractFor(SubContractedClass.class);
 
-        List<Contract<SubContractedClass>> subcontracts = subcontracts(contract);
+        final List<Contract<SubContractedClass>> subcontracts = subcontracts(contract);
         assertTrue(implementation(subcontracts.get(subcontracts.size() - 1)) instanceof TopContract);
     }
 

@@ -1,66 +1,76 @@
 package com.digitalbrikes.contract;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-public final class SimpleContractTest extends TestCase {
-    public void testConstructorThrowsContractBreachExceptionWhenMissingAPrecondititon() {
-        try {
-            new SimpleContract<MissingPreconditionService>(MissingPreconditionService.class);
-            fail("Expected a " + ContractBreachException.class);
-        } catch (ContractBreachException e) {
-            assertTrue(e.getMessage().contains(MissingConditionsContract.class.getName() + ".missingPrecondition"));
-        }
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+
+public final class SimpleContractTest {
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
+    @Test
+    public void constructorShouldThrowContractBreachExceptionWhenMissingAPrecondititon() {
+        thrown.expect(ContractBreachException.class);
+        thrown.expectMessage(MissingConditionsContract.class.getName() + ".missingPrecondition");
+
+        new SimpleContract<MissingPreconditionService>(MissingPreconditionService.class);
     }
 
-    public void testConstructorThrowsContractBreachExceptionWhenMissingAPostcondititon() {
-        try {
-            new SimpleContract<MissingPostconditionService>(MissingPostconditionService.class);
-            fail("Expected a " + ContractBreachException.class);
-        } catch (ContractBreachException e) {
-            assertTrue(e.getMessage().contains(MissingConditionsContract.class.getName() + ".missingPostcondition"));
-        }
+    @Test
+    public void constructorShouldThrowContractBreachExceptionWhenMissingAPostcondititon() {
+        thrown.expect(ContractBreachException.class);
+        thrown.expectMessage(MissingConditionsContract.class.getName() + ".missingPostcondition");
+
+        new SimpleContract<MissingPostconditionService>(MissingPostconditionService.class);
     }
 
-    public void testConstructorThrowsContractClassExceptionWhenContractClassCannotBeInstantiated() {
-        try {
-            new SimpleContract<AbstractContractService>(AbstractContractService.class);
-            fail("Expected a " + ContractClassException.class);
-        } catch (ContractClassException e) {
-            assertTrue(e.getMessage().contains(AbstractContract.class.getName()));
-        }
+    @Test
+    public void constructorShouldThrowContractClassExceptionWhenContractClassCannotBeInstantiated() {
+        thrown.expect(ContractClassException.class);
+        thrown.expectMessage(AbstractContract.class.getName());
+
+        new SimpleContract<AbstractContractService>(AbstractContractService.class);
     }
 
-    public void testIsPreconditionedReturnsFalseWhenNoPreconditionIsSetOnAMethod() throws NoSuchMethodException {
+    @Test
+    public void isPreconditionedShouldReturnFalseWhenNoPreconditionIsSetOnAMethod() throws NoSuchMethodException {
         final SimpleContract<ContractService> testedContract = new SimpleContract<ContractService>(ContractService.class);
 
         assertFalse(testedContract.isPreconditioned(ContractService.class.getMethod("postConditioned", new Class[0])));
     }
 
-    public void testIsPostconditionedReturnsFalseWhenNoPostconditionIsSetOnAMethod() throws NoSuchMethodException {
+    @Test
+    public void isPostconditionedShouldReturnFalseWhenNoPostconditionIsSetOnAMethod() throws NoSuchMethodException {
         final SimpleContract<ContractService> testedContract = new SimpleContract<ContractService>(ContractService.class);
 
         assertFalse(testedContract.isPostconditioned(ContractService.class.getMethod("preConditioned", new Class[0])));
     }
 
-    public void testIsPreconditionedReturnsTrueWhenAPreconditionIsSetOnAMethod() throws NoSuchMethodException {
+    @Test
+    public void isPreconditionedShouldReturnTrueWhenAPreconditionIsSetOnAMethod() throws NoSuchMethodException {
         final SimpleContract<ContractService> testedContract = new SimpleContract<ContractService>(ContractService.class);
 
         assertTrue(testedContract.isPreconditioned(ContractService.class.getMethod("preConditioned", new Class[0])));
     }
 
-    public void testIsPostconditionedReturnsTrueWhenAPostconditionIsSetOnAMethod() throws NoSuchMethodException {
+    @Test
+    public void isPostconditionedShouldReturnTrueWhenAPostconditionIsSetOnAMethod() throws NoSuchMethodException {
         final SimpleContract<ContractService> testedContract = new SimpleContract<ContractService>(ContractService.class);
 
         assertTrue(testedContract.isPostconditioned(ContractService.class.getMethod("postConditioned", new Class[0])));
     }
 
-    public void testConstructorThrowsContractClassExceptionWhenContractClassIsNotAccessible() {
-        try {
-            new SimpleContract<InaccessibleContractService>(InaccessibleContractService.class);
-            fail("Expected a " + ContractClassException.class);
-        } catch (ContractClassException e) {
-            assertTrue(e.getMessage().contains(InaccessibleContract.class.getName()));
-        }
+    @Test
+    public void constructorShouldThrowContractClassExceptionWhenContractClassIsNotAccessible() {
+        thrown.expect(ContractClassException.class);
+        thrown.expectMessage(InaccessibleContract.class.getName());
+
+        new SimpleContract<InaccessibleContractService>(InaccessibleContractService.class);
+
     }
 
     @Contracted(contract = MissingConditionsContract.class)
@@ -98,16 +108,6 @@ public final class SimpleContractTest extends TestCase {
 
     public abstract static class AbstractContract {
 
-    }
-
-    public static final class GoodContract {
-        public boolean precondition(final ContractService service) {
-            return true;
-        }
-
-        public boolean postcondition(final ContractService service) {
-            return true;
-        }
     }
 
     private static final class InaccessibleContract {
