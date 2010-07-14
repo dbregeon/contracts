@@ -11,7 +11,7 @@ final class SimpleContract<T> implements Contract<T> {
     private final Map<MethodKey, Precondition<T>> preconditions = new HashMap<MethodKey, Precondition<T>>();
     private final Map<MethodKey, Postcondition<T>> postconditions = new HashMap<MethodKey, Postcondition<T>>();
 
-    public SimpleContract(final Class<T> clazz) throws ContractClassException, ContractBreachException {
+    SimpleContract(final Class<T> clazz) throws ContractClassException, ContractBreachException {
         contractedClass = clazz;
         implementation = buildInstanceOf(contractClass(contractedClass));
         initializeConditions();
@@ -33,12 +33,14 @@ final class SimpleContract<T> implements Contract<T> {
         }
     }
 
+    @Override
     public boolean isPreconditioned(final Method m) {
-        return (null != precondition(m));
+        return null != precondition(m);
     }
 
+    @Override
     public boolean isPostconditioned(final Method m) {
-        return (null != postcondition(m));
+        return null != postcondition(m);
     }
 
     private Precondition<T> precondition(final Method method) {
@@ -52,9 +54,9 @@ final class SimpleContract<T> implements Contract<T> {
     private Object buildInstanceOf(final Class<?> contractClass) {
         try {
             return contractClass.newInstance();
-        } catch (InstantiationException e) {
+        } catch (final InstantiationException e) {
             throw new ContractClassException(ContractClassException.ErrorType.CONTRACT_INSTANTIATION, contractClass, e);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new ContractClassException(ContractClassException.ErrorType.CONTRACT_ACCESS, contractClass, e);
         }
     }
@@ -64,7 +66,7 @@ final class SimpleContract<T> implements Contract<T> {
     }
 
     private void initializeConditions() {
-        for (Method method : contractedClass.getDeclaredMethods()) {
+        for (final Method method : contractedClass.getDeclaredMethods()) {
             addPreconditionFor(method);
             addPostConditionFor(method);
         }
@@ -97,7 +99,7 @@ final class SimpleContract<T> implements Contract<T> {
             return name.equals(other.name) && Arrays.equals(parameterTypes, other.parameterTypes);
         }
 
-        public MethodKey(final Method method) {
+        protected MethodKey(final Method method) {
             name = method.getName();
             parameterTypes = method.getParameterTypes();
         }

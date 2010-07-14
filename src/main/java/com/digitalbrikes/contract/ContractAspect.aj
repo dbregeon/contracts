@@ -5,6 +5,12 @@ import java.lang.reflect.Method;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 
+/**
+ * This aspect is weaved for all contracted classes and will enforce the contract(s).
+ * 
+ * The pre and post conditions will be verified before and after the actual invocation
+ * respectively.
+ */
 public aspect ContractAspect pertypewithin(!com.digitalbrikes.contract.*){
     pointcut contracted(Object o): this(o) && if (isContracted(o));
     pointcut precondition(): contracted(Object) && execution(public * *.*(..)) && if (isPreconditioned(thisJoinPoint));
@@ -16,6 +22,7 @@ public aspect ContractAspect pertypewithin(!com.digitalbrikes.contract.*){
         return ((MethodSignature) joinPoint.getSignature()).getMethod();
     }
     
+    @SuppressWarnings("unused")
     private static boolean isContracted(final Object o) {
         if (null == contract) {
             contract = ContractFactory.instance().contractFor(o.getClass());
@@ -27,6 +34,7 @@ public aspect ContractAspect pertypewithin(!com.digitalbrikes.contract.*){
         return contract;
     }
     
+    @SuppressWarnings("unused")
     private static boolean isPreconditioned(final JoinPoint joinPoint) {
         boolean result = false;
         if (null != contract) {
@@ -35,6 +43,7 @@ public aspect ContractAspect pertypewithin(!com.digitalbrikes.contract.*){
         return result;
     }
     
+    @SuppressWarnings("unused")
     private static boolean isPostconditioned(final JoinPoint joinPoint) {
         boolean result = false;
         if (null != contract) {

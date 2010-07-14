@@ -6,7 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public final class ContractFactory {
+/**
+ * Factory that enables to build Contracts for specific types. ContractFactories are
+ *  provided through a ThreadLocal instance and are therefore thread safe.
+ */
+final class ContractFactory {
     private static final ThreadLocal<ContractFactory> FACTORIES = new ThreadLocal<ContractFactory>() {
         @Override
         protected ContractFactory initialValue() {
@@ -14,10 +18,28 @@ public final class ContractFactory {
         }
     };
 
+    /**
+     * @return the instance of the ContractFactory for this thread.
+     */
     public static ContractFactory instance() {
         return FACTORIES.get();
     }
 
+    private ContractFactory() {
+        // Hide the constructor.
+        super();
+    }
+
+    /**
+     * Provides access to this factory's instance of the contract for a particular type.
+     * @param <T> the type that will be the subject of this contract.
+     * @param clazz the class that represents the type that is the subject of this contract.
+     * @return the contract implementation for the given type.
+     * @throws ContractClassException when the contract cannot be instantiated.
+     * @throws ContractBreachException when there is an inconsistency between the contract specification
+     * in type <T> and the implementation of that contract (e.g. missing condition, incompatible
+     * parameter types).
+     */
     public <T> Contract<T> contractFor(final Class<?> clazz) throws ContractClassException, ContractBreachException {
         final List<Class<T>> contractedClasses = contractedClass(clazz);
         Contract<T> result = null;
@@ -35,7 +57,7 @@ public final class ContractFactory {
 
     private <T> List<Contract<T>> simpleContractsFor(final List<Class<T>> contractedClasses) {
         final List<Contract<T>> subcontracts = new ArrayList<Contract<T>>();
-        for (Class<T> clazz : contractedClasses) {
+        for (final Class<T> clazz : contractedClasses) {
             subcontracts.add(simpleContractFor(clazz));
         }
         return subcontracts;
@@ -51,16 +73,21 @@ public final class ContractFactory {
         classes.add(clazz);
         while (!classes.isEmpty()) {
             final Class<?> current = classes.remove(0);
-            if (current.isAnnotationPresent(Contracted.class) && !result.contains(current)) {
-                result.add((Class<T>) current);
-            }
+            addNewContractedClassToResult(result, current);
             classes.addAll(ancestors(current));
         }
         return result;
     }
 
+    private <T> void addNewContractedClassToResult(final List<Class<T>> result,
+            final Class<?> current) {
+        if (current.isAnnotationPresent(Contracted.class) && !result.contains(current)) {
+            result.add((Class<T>) current);
+        }
+    }
+
     private Set<Class<?>> ancestors(final Class<?> clazz) {
-        Set<Class<?>> result = new HashSet<Class<?>>();
+        final Set<Class<?>> result = new HashSet<Class<?>>();
         result.addAll(Arrays.asList(clazz.getInterfaces()));
         if (null != clazz.getSuperclass()) {
             result.add(clazz.getSuperclass());

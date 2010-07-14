@@ -8,7 +8,7 @@ import java.util.List;
 final class CompositeContract<T> implements Contract<T> {
     private final List<Contract<T>> subcontracts = new ArrayList<Contract<T>>();
 
-    public CompositeContract(final List<Contract<T>> contracts) throws ContractBreachException {
+    CompositeContract(final List<Contract<T>> contracts) throws ContractBreachException {
         subcontracts.addAll(contracts);
     }
 
@@ -34,14 +34,14 @@ final class CompositeContract<T> implements Contract<T> {
 
     @Override
     public void verifyPostcondition(final T contractObject, final Method method, final Object[] args, final Object result) throws ContractBreachException {
-        for (Contract<T> subcontract : subcontracts) {
+        for (final Contract<T> subcontract : subcontracts) {
             subcontract.verifyPostcondition(contractObject, method, args, result);
         }
     }
 
     @Override
     public void verifyPrecondition(final T contractObject, final Method method, final Object[] args) throws ContractBreachException {
-        for (Contract<T> subcontract : subcontracts) {
+        for (final Contract<T> subcontract : subcontracts) {
             subcontract.verifyPrecondition(contractObject, method, args);
         }
     }

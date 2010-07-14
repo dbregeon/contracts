@@ -10,20 +10,32 @@ import java.lang.reflect.Method;
  * @param <T> the type under contract.
  */
 public final class ContractInvocationHandler<T> implements InvocationHandler {
-    private Contract<T> contract;
+    private final Contract<T> contract;
     private final T contractedObject;
 
+    /**
+     * Builds an invocation handler that will wrap an object and verify its declared
+     * contract when methods are invoked.
+     *
+     * @param object the object to be wrapped.
+     * @throws ContractClassException when the contract for the object can not be built.
+     * @throws ContractBreachException when specification of the contract for the object
+     * does not match its implementation.
+     */
     public ContractInvocationHandler(final T object) throws ContractClassException, ContractBreachException {
         contractedObject = object;
         contract = ContractFactory.instance().contractFor(contractedObject.getClass());
     }
 
+    /**
+     * @return the object wrapped by this invocation handler.
+     */
     public T contractedObject() {
         return contractedObject;
     }
 
-    public Object invoke(final Object proxy, final Method method, final Object[] args)
-            throws Throwable {
+    @Override
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         verifyPrecondition(method, args);
         final Object result = method.invoke(contractedObject, args);
         verifyPostcondition(method, args, result);
@@ -43,6 +55,6 @@ public final class ContractInvocationHandler<T> implements InvocationHandler {
     }
 
     private boolean hasContract() {
-        return (null != contract);
+        return null != contract;
     }
 }

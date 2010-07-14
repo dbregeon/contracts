@@ -2,26 +2,26 @@ package com.digitalbrikes.contract;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 final class Postcondition<T> extends Condition<T> {
     private boolean isVoid;
 
-    public Postcondition(final Method method, final Object implementation) throws ContractBreachException {
+    Postcondition(final Method method, final Object implementation) throws ContractBreachException {
         super(method, implementation);
     }
 
-    public boolean verify(final T contractObject, final Object[] args, final Object result) {
+    boolean verify(final T contractObject, final Object[] args, final Object result) {
         return invoke(arguments(contractObject, args, result));
     }
 
+    @Override
     protected Class<?>[] parameterTypes(final Method method) {
         final Class<?>[] paramTypes = method.getParameterTypes();
         final List<Class<?>> result = new ArrayList<Class<?>>();
         result.add(method.getDeclaringClass());
-        for (int i = 0; i < paramTypes.length; i++) {
-            result.add(paramTypes[i]);
-        }
+        result.addAll(Arrays.asList(paramTypes));
         if (!isVoid(method)) {
             result.add(method.getReturnType());
         }
@@ -29,7 +29,7 @@ final class Postcondition<T> extends Condition<T> {
     }
 
     private boolean isVoid(final Method method) {
-        isVoid  = (Void.TYPE == method.getReturnType());
+        isVoid  = Void.TYPE == method.getReturnType();
         return isVoid;
     }
 
@@ -41,9 +41,7 @@ final class Postcondition<T> extends Condition<T> {
     private Object[] arguments(final T contractObject, final Object[] invocationArguments, final Object result) {
         final List<Object> contractArgs = new ArrayList<Object>();
         contractArgs.add(contractObject);
-        for (int i = 0; i < invocationArguments.length; i++) {
-            contractArgs.add(invocationArguments[i]);
-        }
+        contractArgs.addAll(Arrays.asList(invocationArguments));
         if (!isVoid) {
             contractArgs.add(result);
         }

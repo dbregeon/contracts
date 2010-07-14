@@ -1,6 +1,11 @@
 package com.digitalbrikes.contract;
 
-
+/**
+ * Signals an error with the contract implementation class declared by a contracted type.
+ *
+ * It can be the inability to instantiate the implementation or even the inability to access
+ * the class.
+ */
 public final class ContractClassException extends ContractException {
     private static final long serialVersionUID = 1L;
 
@@ -8,7 +13,7 @@ public final class ContractClassException extends ContractException {
         super(type.message(clazz), cause);
     }
 
-    public static enum ErrorType {
+    static enum ErrorType {
         CONTRACT_INSTANTIATION("Could not instantiate contract"),
         CONTRACT_ACCESS("Could not access contract");
 
@@ -18,7 +23,7 @@ public final class ContractClassException extends ContractException {
             messageBase = s;
         }
 
-        public String message(final Class<?> clazz) {
+        protected String message(final Class<?> clazz) {
             final StringBuilder result = new StringBuilder(messageBase);
             result.append(" ");
             result.append(clazz.getName());

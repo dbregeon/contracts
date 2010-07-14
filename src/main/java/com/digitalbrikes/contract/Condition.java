@@ -9,7 +9,7 @@ abstract class Condition<T> {
     private final Method conditionMethod;
     private final Object implementation;
 
-    public Condition(final Method m, final Object i) throws ContractBreachException {
+    Condition(final Method m, final Object i) throws ContractBreachException {
         implementation = i;
         conditionMethod = conditionMethod(m);
     }
@@ -17,11 +17,11 @@ abstract class Condition<T> {
     protected final Boolean invoke(final Object[] args) throws ContractBreachException {
         try {
             return (Boolean) conditionMethod.invoke(implementation, args);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new ContractBreachException(ErrorType.INVALID_CONDITION, conditionMethod, e);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new ContractBreachException(ErrorType.INACCESSIBLE_CONDITION, conditionMethod, e);
-        } catch (InvocationTargetException e) {
+        } catch (final InvocationTargetException e) {
             throw new ContractBreachException(ErrorType.BROKEN_CONDITION, conditionMethod, e);
         }
     }
@@ -39,9 +39,9 @@ abstract class Condition<T> {
     private Method conditionMethod(final Method method) throws ContractBreachException {
         try {
             return implementation.getClass().getDeclaredMethod(methodName(method), parameterTypes(method));
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             throw new ContractBreachException(ErrorType.INACCESSIBLE_CONDITION, fullMethodName(method), e);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new ContractBreachException(ErrorType.MISSING_CONDITION, fullMethodName(method), e);
         }
     }
