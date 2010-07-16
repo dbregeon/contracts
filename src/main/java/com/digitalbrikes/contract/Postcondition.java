@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 final class Postcondition<T> extends Condition<T> {
-    private boolean isVoid;
+    private boolean voidReturnType;
 
     Postcondition(final Method method, final Object implementation) throws ContractBreachException {
         super(method, implementation);
@@ -25,12 +25,12 @@ final class Postcondition<T> extends Condition<T> {
         if (!isVoid(method)) {
             result.add(method.getReturnType());
         }
-        return result.toArray(new Class[0]);
+        return result.toArray(new Class[result.size()]);
     }
 
     private boolean isVoid(final Method method) {
-        isVoid  = Void.TYPE == method.getReturnType();
-        return isVoid;
+        voidReturnType  = Void.TYPE == method.getReturnType();
+        return voidReturnType;
     }
 
     @Override
@@ -42,7 +42,7 @@ final class Postcondition<T> extends Condition<T> {
         final List<Object> contractArgs = new ArrayList<Object>();
         contractArgs.add(contractObject);
         contractArgs.addAll(Arrays.asList(invocationArguments));
-        if (!isVoid) {
+        if (!voidReturnType) {
             contractArgs.add(result);
         }
         return contractArgs.toArray();

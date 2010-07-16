@@ -11,7 +11,7 @@ abstract class Condition<T> {
 
     Condition(final Method m, final Object i) throws ContractBreachException {
         implementation = i;
-        conditionMethod = conditionMethod(m);
+        conditionMethod = conditionMethodFor(m);
     }
 
     protected final Boolean invoke(final Object[] args) throws ContractBreachException {
@@ -36,7 +36,7 @@ abstract class Condition<T> {
         return result.toString();
     }
 
-    private Method conditionMethod(final Method method) throws ContractBreachException {
+    private Method conditionMethodFor(final Method method) throws ContractBreachException {
         try {
             return implementation.getClass().getDeclaredMethod(methodName(method), parameterTypes(method));
         } catch (final SecurityException e) {
